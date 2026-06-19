@@ -17,8 +17,9 @@ class UNREAL5CLASS_API ULockOnComponent : public UActorComponent
 	APlayerController* Controller;
 
 	class UCharacterMovementComponent* MovementComp;
+	class USpringArmComponent* SpringArmComp;
 
-public:	
+public:
 	// Sets default values for this component's properties
 	ULockOnComponent();
 
@@ -30,6 +31,14 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void StartLockon(float Radius = 750.0f);
+
+	void EndLockon();
+
+	UFUNCTION(BlueprintCallable)
+	void ToggleLockon(float Radius = 750.0f);
+
+	UPROPERTY(EditAnywhere)
+	double BreakDistance{ 1000.0 };
 
 public:	
 	// Called every frame

@@ -4,6 +4,7 @@
 #include "Combat/LockOnComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values for this component's properties
@@ -25,6 +26,7 @@ void ULockOnComponent::BeginPlay()
 	OwnerRef = GetOwner<ACharacter>();
 	Controller = GetWorld()->GetFirstPlayerController();
 	MovementComp = OwnerRef->GetCharacterMovement();
+	SpringArmComp = OwnerRef->FindComponentByClass<USpringArmComponent>();
 }
 
 void ULockOnComponent::StartLockon(float Radius)
@@ -56,6 +58,29 @@ void ULockOnComponent::StartLockon(float Radius)
 	MovementComp->bOrientRotationToMovement = false;
 	MovementComp->bUseControllerDesiredRotation = true;
 
+	SpringArmComp->TargetOffset = FVector{ 0.0, 0.0, 100.0 };
+}
+
+void ULockOnComponent::EndLockon()
+{
+	CurrentTargetActor = nullptr;
+	MovementComp->bOrientRotationToMovement = true;
+	MovementComp->bUseControllerDesiredRotation = false;
+	SpringArmComp->TargetOffset = FVector::ZeroVector;
+
+	Controller->ResetIgnoreLookInput();
+
+
+}
+
+void ULockOnComponent::ToggleLockon(float Radius)
+{
+	if (IsValid(CurrentTargetActor)) {
+		EndLockon();
+	}
+	else {
+		StartLockon(Radius);
+	}
 }
 
 
@@ -67,6 +92,18 @@ void ULockOnComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	if (!IsValid(CurrentTargetActor)) { return; }
 	FVector CurrentLocation{ OwnerRef->GetActorLocation() };
 	FVector TargetLocation{ CurrentTargetActor->GetActorLocation() };
+
+	double TargetDistance{
+		FVector::Distance(CurrentLocation, TargetLocation)
+	};
+
+	if (TargetDistance >= BreakDistance) {
+		EndLockon();
+		return;
+	}
+
+	TargetLocation.Z -= 125;
+
 
 	FRotator NewRotation{ UKismetMathLibrary::FindLookAtRotation(
 		CurrentLocation, TargetLocation
