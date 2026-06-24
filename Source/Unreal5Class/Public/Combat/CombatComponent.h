@@ -12,6 +12,17 @@ class UNREAL5CLASS_API UCombatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere)
+	TArray<UAnimMontage*> AttackAnimations;
+
+	ACharacter* CharacterRef;
+
+	UPROPERTY(VisibleAnywhere)
+	int ComboCounter{ 0 };
+
+	UPROPERTY(VisibleAnywhere)
+	bool bCanAttack{ true };
+
 public:	
 	// Sets default values for this component's properties
 	UCombatComponent();
@@ -24,5 +35,9 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+	UFUNCTION(BlueprintCallable)
+	void ComboAttack();
+
+	UFUNCTION(BlueprintCallable)
+	void HandleResetAttack();
 };

@@ -17,13 +17,13 @@ class UNREAL5CLASS_API UPlayerAnimation : public UAnimInstance
 protected:
 
 	UFUNCTION(BlueprintCallable)
-	void UpdateVelocity();
+	void UpdateSpeed();
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool BIsInCombat{ false };
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	float CurrentVelocity{ 0.0f };
+	float CurrentSpeed{ 0.0f };
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float CurrentDirection{ 0.0f };

@@ -3,7 +3,7 @@
 
 #include "Animations/PlayerAnimation.h"
 
-void UPlayerAnimation::UpdateVelocity()
+void UPlayerAnimation::UpdateSpeed()
 {
 	APawn* PawnRef{ TryGetPawnOwner() };
 	//Tries to get Pawn
@@ -11,7 +11,7 @@ void UPlayerAnimation::UpdateVelocity()
 	//If fails to get pawn, returns early
 
 	FVector Velocity{ PawnRef->GetVelocity() };
-	CurrentVelocity = static_cast<float>(Velocity.Length());
+	CurrentSpeed = static_cast<float>(Velocity.Length());
 
 	//Sets Velocity
 
