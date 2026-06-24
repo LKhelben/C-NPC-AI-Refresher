@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Interfaces/Enemy.h"
 
 // Sets default values for this component's properties
 ULockOnComponent::ULockOnComponent()
@@ -52,6 +53,8 @@ void ULockOnComponent::StartLockon(float Radius)
 
 	if (!bHasFoundTarget) { return; }
 
+	if (!OutResult.GetActor()->Implements<UEnemy>()) { return; }
+
 	CurrentTargetActor = OutResult.GetActor();
 
 	Controller->SetIgnoreLookInput(true);
@@ -59,10 +62,14 @@ void ULockOnComponent::StartLockon(float Radius)
 	MovementComp->bUseControllerDesiredRotation = true;
 
 	SpringArmComp->TargetOffset = FVector{ 0.0, 0.0, 100.0 };
+	IEnemy::Execute_OnSelect(CurrentTargetActor);
+
+	OnUpdatedTargetDelegate.Broadcast(CurrentTargetActor);
 }
 
 void ULockOnComponent::EndLockon()
 {
+	IEnemy::Execute_OnDeselect(CurrentTargetActor);
 	CurrentTargetActor = nullptr;
 	MovementComp->bOrientRotationToMovement = true;
 	MovementComp->bUseControllerDesiredRotation = false;
@@ -70,7 +77,7 @@ void ULockOnComponent::EndLockon()
 
 	Controller->ResetIgnoreLookInput();
 
-
+	OnUpdatedTargetDelegate.Broadcast(CurrentTargetActor);
 }
 
 void ULockOnComponent::ToggleLockon(float Radius)

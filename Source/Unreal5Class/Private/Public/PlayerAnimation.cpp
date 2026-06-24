@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Public/PlayerAnimation.h"
+#include "Animations/PlayerAnimation.h"
 
 void UPlayerAnimation::UpdateVelocity()
 {
@@ -15,4 +15,22 @@ void UPlayerAnimation::UpdateVelocity()
 
 	//Sets Velocity
 
+}
+
+void UPlayerAnimation::HandleUpdatedTarget(AActor* NewTargetActorRef)
+{
+	BIsInCombat = IsValid(NewTargetActorRef);
+}
+
+void UPlayerAnimation::UpdateDirection()
+{
+	APawn* PawnRef{ TryGetPawnOwner() };
+	
+	if(!IsValid(PawnRef)) { return; }
+	if (!BIsInCombat) { return; }
+
+	CurrentDirection = CalculateDirection(
+		PawnRef->GetVelocity(),
+		PawnRef->GetActorRotation()
+	);
 }
