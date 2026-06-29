@@ -16,6 +16,9 @@ public:
 	// Sets default values for this character's properties
 	ABossCharacter();
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	class UStatsComponent* StatsComp;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
