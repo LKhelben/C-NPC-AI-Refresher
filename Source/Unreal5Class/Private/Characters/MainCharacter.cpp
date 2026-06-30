@@ -22,7 +22,7 @@ AMainCharacter::AMainCharacter()
 	BlockComp = CreateDefaultSubobject<UBlockComponent>(TEXT("Block Component"));
 	TraceComp = CreateDefaultSubobject<UTraceComponent>(TEXT("Trace Component"));
 	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat Component"));
-	PlayerActionsComp = CreateDefaultSubobject<UPlayerActionsComponent>(TEXT("Player Actions Component"));
+	//PlayerActionsComp = CreateDefaultSubobject<UPlayerActionsComponent>(TEXT("Player Actions Component"));
 }
 
 // Called when the game starts or when spawned
