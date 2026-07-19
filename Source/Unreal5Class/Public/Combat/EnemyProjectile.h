@@ -10,6 +10,9 @@ UCLASS()
 class UNREAL5CLASS_API AEnemyProjectile : public AActor
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* HitTemplate;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -25,4 +28,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void HandleBeginOverlap(AActor* OtherActor);
+
+	UFUNCTION()
+	void DestroyProjectile();
 };
