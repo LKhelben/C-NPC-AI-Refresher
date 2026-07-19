@@ -32,39 +32,64 @@ void ULockOnComponent::BeginPlay()
 
 void ULockOnComponent::StartLockon(float Radius)
 {
-	FHitResult OutResult;
-	FVector CurrentLocation{ OwnerRef->GetActorLocation() };
-	FCollisionShape Sphere{ FCollisionShape::MakeSphere(Radius) };
-	FCollisionQueryParams IgnoreParams{
-		FName {TEXT("Ignore Collision Params")},
-		false,
-		OwnerRef
-	};
+    FVector CurrentLocation{ OwnerRef->GetActorLocation() };
+    FCollisionShape Sphere{ FCollisionShape::MakeSphere(Radius) };
+    FCollisionQueryParams IgnoreParams{
+        FName{ TEXT("Ignore Collision Params") },
+        false,
+        OwnerRef
+    };
 
-	bool bHasFoundTarget{ GetWorld()->SweepSingleByChannel(
-		OutResult,
-		CurrentLocation,
-		CurrentLocation,
-		FQuat::Identity,
-		ECollisionChannel::ECC_GameTraceChannel1,
-		Sphere,
-		IgnoreParams
-	) };
+    TArray<FOverlapResult> OutResults;
+    bool bHasFoundTargets{ GetWorld()->OverlapMultiByChannel(
+        OutResults,
+        CurrentLocation,
+        FQuat::Identity,
+        ECollisionChannel::ECC_GameTraceChannel1,
+        Sphere,
+        IgnoreParams
+    ) };
 
-	if (!bHasFoundTarget) { return; }
+    if (!bHasFoundTargets) { return; }
 
-	if (!OutResult.GetActor()->Implements<UEnemy>()) { return; }
+    FVector LookDirection{ Controller->GetControlRotation().Vector() };
 
-	CurrentTargetActor = OutResult.GetActor();
+    AActor* BestTarget = nullptr;
+    float BestScore = -FLT_MAX;
 
-	Controller->SetIgnoreLookInput(true);
-	MovementComp->bOrientRotationToMovement = false;
-	MovementComp->bUseControllerDesiredRotation = true;
+    // Tune this to bias more toward angle (higher value) or distance (lower value)
+    constexpr float DistanceWeight = 1.0f;
 
-	SpringArmComp->TargetOffset = FVector{ 0.0, 0.0, 100.0 };
-	IEnemy::Execute_OnSelect(CurrentTargetActor);
+    for (const FOverlapResult& Result : OutResults)
+    {
+        AActor* CandidateActor = Result.GetActor();
+        if (!CandidateActor || !CandidateActor->Implements<UEnemy>()) { continue; }
 
-	OnUpdatedTargetDelegate.Broadcast(CurrentTargetActor);
+        FVector ToTarget{ CandidateActor->GetActorLocation() - CurrentLocation };
+        float Distance{ static_cast<float>(ToTarget.Size()) };
+        FVector DirectionToTarget{ ToTarget.GetSafeNormal() };
+
+        float Dot{ static_cast<float>(FVector::DotProduct(LookDirection, DirectionToTarget)) };
+        float NormalizedDistance{ Distance / Radius }; // 0.0 (close) to 1.0 (edge of sphere)
+
+        float Score{ Dot - (NormalizedDistance * DistanceWeight) };
+
+        if (Score > BestScore)
+        {
+            BestScore = Score;
+            BestTarget = CandidateActor;
+        }
+    }
+
+    if (!BestTarget) { return; }
+
+    CurrentTargetActor = BestTarget;
+    Controller->SetIgnoreLookInput(true);
+    MovementComp->bOrientRotationToMovement = false;
+    MovementComp->bUseControllerDesiredRotation = true;
+    SpringArmComp->TargetOffset = FVector{ 0.0, 0.0, 100.0 };
+    IEnemy::Execute_OnSelect(CurrentTargetActor);
+    OnUpdatedTargetDelegate.Broadcast(CurrentTargetActor);
 }
 
 void ULockOnComponent::EndLockon()
