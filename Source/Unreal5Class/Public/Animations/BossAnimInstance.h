@@ -15,8 +15,11 @@ class UNREAL5CLASS_API UBossAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float CurrentSpeed{ 0.0f };
 
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool bIsCharging{ false };
 	
 };

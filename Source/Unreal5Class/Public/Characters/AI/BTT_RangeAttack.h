@@ -16,6 +16,8 @@ class UNREAL5CLASS_API UBTT_RangeAttack : public UBTTaskNode
 
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* AnimMontage;
+
+	double Threshold{ 0.9 };
 	
 public:
 	virtual EBTNodeResult::Type
